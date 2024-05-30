@@ -1,0 +1,8 @@
+services:
+  burgeramtparser:
+    container_name: burgeramtParser
+    build:
+      context: ./
+      args:
+        - TG_TOKEN=${TG_TOKEN}
+        - CHAT_ID=${CHAT_ID}
