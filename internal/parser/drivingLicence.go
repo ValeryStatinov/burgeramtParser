@@ -25,9 +25,10 @@ func NewDrivingLicenceSpider() *DrivingLicenceSpider {
 	}
 }
 
-func (dls *DrivingLicenceSpider) Crawl() []string {
+func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 	c := colly.NewCollector()
 	availableDates := make([]string, 0, 10)
+	var err error = nil
 
 	c.OnHTML("td.buchbar", func(h *colly.HTMLElement) {
 		date := getDate(h)
@@ -38,10 +39,10 @@ func (dls *DrivingLicenceSpider) Crawl() []string {
 
 	c.OnResponse(func(r *colly.Response) {
 		if r.StatusCode != http.StatusOK {
-			fmt.Println("Response is not 200, got", r.StatusCode)
+			err = fmt.Errorf("response is not 200, got %d", r.StatusCode)
 		}
 	})
 
 	c.Visit(dls.url)
-	return availableDates
+	return availableDates, err
 }

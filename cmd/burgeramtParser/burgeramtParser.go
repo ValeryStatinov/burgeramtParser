@@ -21,7 +21,13 @@ func main() {
 
 	tick := func() {
 		fmt.Println("start crawling...")
-		dates := dls.Crawl()
+		dates, err := dls.Crawl()
+		if err != nil {
+			tgClient.SendMessage(err.Error(), chatId)
+
+			return
+		}
+
 		for _, d := range dates {
 			tgClient.SendMessage(d, chatId)
 		}
