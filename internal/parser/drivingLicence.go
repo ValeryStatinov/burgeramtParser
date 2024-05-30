@@ -1,15 +1,21 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/gocolly/colly"
 )
 
 var (
 	dateR = regexp.MustCompile(`\d+\.\d+\.\d+`)
+)
+
+var (
+	ErrNoAvailableTermins = errors.New("no available termins")
 )
 
 type DrivingLicenceSpider struct {
@@ -34,6 +40,11 @@ func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 		date := getDate(h)
 		if date != "" {
 			availableDates = append(availableDates, date)
+		}
+	})
+	c.OnHTML("h1", func(h *colly.HTMLElement) {
+		if strings.Contains(h.Text, "Leider sind aktuell keine Termine") {
+			err = ErrNoAvailableTermins
 		}
 	})
 

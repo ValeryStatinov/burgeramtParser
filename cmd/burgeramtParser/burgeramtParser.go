@@ -17,14 +17,18 @@ func main() {
 	dls := parser.NewDrivingLicenceSpider()
 	tgClient := tg.NewTgClient(tgToken)
 
-	ticker := time.NewTicker(time.Minute * 3)
+	ticker := time.NewTicker(time.Minute * 1)
 
 	tick := func() {
 		fmt.Println("start crawling...")
 		dates, err := dls.Crawl()
 		if err != nil {
-			tgClient.SendMessage(err.Error(), chatId)
+			if err == parser.ErrNoAvailableTermins {
+				fmt.Println(err.Error())
+				return
+			}
 
+			tgClient.SendMessage(err.Error(), chatId)
 			return
 		}
 
