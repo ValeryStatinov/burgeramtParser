@@ -65,6 +65,11 @@ func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 		}
 	})
 
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Println("error occured:", err.Error())
+		fmt.Println(r.StatusCode, string(r.Body))
+	})
+
 	fmt.Println("visiting", dls.url)
 	c.Visit(dls.url)
 	return availableDates, resultErr
