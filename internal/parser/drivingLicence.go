@@ -50,12 +50,13 @@ func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 	})
 
 	c.OnResponse(func(r *colly.Response) {
-		f, err := os.Open("./a.html")
+		f, err := os.OpenFile("./a.html", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			resultErr = err
 		}
 		defer f.Close()
-		f.Write(r.Body)
+		_, e := f.Write(r.Body)
+		fmt.Println(e)
 
 		if r.StatusCode != http.StatusOK {
 			resultErr = fmt.Errorf("response is not 200, got %d", r.StatusCode)
