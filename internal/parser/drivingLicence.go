@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 
@@ -34,7 +35,7 @@ func NewDrivingLicenceSpider() *DrivingLicenceSpider {
 func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 	c := colly.NewCollector()
 	availableDates := make([]string, 0, 10)
-	var err error = nil
+	var resultErr error = nil
 
 	c.OnHTML("td.buchbar", func(h *colly.HTMLElement) {
 		date := getDate(h)
@@ -44,16 +45,23 @@ func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 	})
 	c.OnHTML("h1", func(h *colly.HTMLElement) {
 		if strings.Contains(h.Text, "Leider sind aktuell keine Termine") {
-			err = ErrNoAvailableTermins
+			resultErr = ErrNoAvailableTermins
 		}
 	})
 
 	c.OnResponse(func(r *colly.Response) {
+		f, err := os.Open("./a.html")
+		if err != nil {
+			resultErr = err
+		}
+		defer f.Close()
+		f.Write(r.Body)
+
 		if r.StatusCode != http.StatusOK {
-			err = fmt.Errorf("response is not 200, got %d", r.StatusCode)
+			resultErr = fmt.Errorf("response is not 200, got %d", r.StatusCode)
 		}
 	})
 
 	c.Visit(dls.url)
-	return availableDates, err
+	return availableDates, resultErr
 }
