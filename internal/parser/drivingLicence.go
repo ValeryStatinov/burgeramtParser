@@ -44,12 +44,14 @@ func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 		}
 	})
 	c.OnHTML("h1", func(h *colly.HTMLElement) {
+		fmt.Println("found h1 with text", h.Text)
 		if strings.Contains(h.Text, "Leider sind aktuell keine Termine") {
 			resultErr = ErrNoAvailableTermins
 		}
 	})
 
 	c.OnResponse(func(r *colly.Response) {
+		fmt.Println("received response", r.StatusCode)
 		f, err := os.OpenFile("./a.html", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			resultErr = err
@@ -63,6 +65,7 @@ func (dls *DrivingLicenceSpider) Crawl() ([]string, error) {
 		}
 	})
 
+	fmt.Println("visiting", dls.url)
 	c.Visit(dls.url)
 	return availableDates, resultErr
 }
